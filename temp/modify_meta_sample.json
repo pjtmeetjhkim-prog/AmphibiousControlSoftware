@@ -1,0 +1,116 @@
+{
+  "currentSelectUnit": 0, //현재 선택 호기
+  "init": true, //초기화 완료 유무
+  "numberOFUnits": 3, // 운용대수
+  "robot_1": { //로봇별 구분 데이터
+    "operation_mode": "operator",
+    "mission_mode": "move",
+    "waypoints": [ //kiro(via points)
+      {
+        "lat": 37.54328429801165,
+        "lng": 126.95547580001147
+      },
+      {
+        "lat": 37.55264121357307,
+        "lng": 126.92800998053049
+      }
+    ], //>>지도 매핑 임무관리 계산
+    "goalpoint": [
+      {
+        "lat": 37.54328429801165,
+        "lng": 126.95547580001147
+      }
+    ], //>>GUI 목표점설정
+    "observe_data": {
+      "pan": 0.0,
+      "tilt": 0.0,
+      "trackState": 0.0,
+    }, //감시장비 상태
+    "dector_data": {
+      "box": [
+        {
+          "xy[0]": 37.0,
+          "xy[1]": 37.0,
+          "xy[3]": 37.0,
+          "xy[4]": 37.0
+        }
+      ],
+      "confidence": 0.77,
+      "class": 8,
+      "name": "boat"
+    }, //표적처리상태
+    "robot_status_data": { //로봇 운용상태 변수
+      "id": 1,
+      "curXspeed": 17.704331665255655,
+      "curYspeed": 35.492091400130846,
+      "curRpos": 162.84764614889448,
+      "curMode": "operator",
+      "curMission": "move",
+      "desiredXspeed": 0, //>> desired[x][y] 계산 상수 필요
+      "desiredYspeed": 0,
+      "desiredRpos": 2,
+      "longitude": 127.00020046551988,
+      "latitude": 37.500318829423286,
+      "battPercent": 60,
+      "battTempC": 24,
+      "battState": 0,
+      "emeState": 0 //[0:normal], [1:emeState]
+    } //로봇 상태
+  },
+  "robot_2": {
+    "operation_mode": "manual",
+    "mission_mode": "stop",
+    "waypoints": [
+      {
+        "lat": 37.58444593976859,
+        "lng": 126.93830966283585
+      },
+      {
+        "lat": 37.58937700709153,
+        "lng": 126.97800635505442
+      },
+      {
+        "lat": 37.57016100484251,
+        "lng": 127.00525759782067
+      },
+      {
+        "lat": 37.55400212162329,
+        "lng": 126.9885206140745
+      },
+      {
+        "lat": 37.55502278635211,
+        "lng": 126.949467652
+      },
+      {
+        "lat": 37.54328429801165,
+        "lng": 126.95547580001147
+      },
+      {
+        "lat": 37.55264121357307,
+        "lng": 126.92800998053049
+      }
+    ]
+  },
+  "robot_3": {
+    "operation_mode": "manual",
+    "mission_mode": "stop",
+    "waypoints": [
+      {
+        "lat": 37.592947576053646,
+        "lng": 126.94303035055913
+      },
+      {
+        "lat": 37.610117919170385,
+        "lng": 126.99967860323859
+      },
+      {
+        "lat": 37.6005982184076,
+        "lng": 127.04259394617763
+      },
+      {
+        "lat": 37.566929508581275,
+        "lng": 127.04710005718621
+      }
+    ]
+  }
+}

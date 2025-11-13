@@ -1,0 +1,25 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    
+}
+#dumpTextOut {
+  font-family: monospace;
+  white-space: pre;
+  background: #111;
+  color: #ccc;
+  padding: 8px;
+}
+#dumpTextOut .key { color: #7dcfff; }
+#dumpTextOut .string { color: #a8ff60; }
+#dumpTextOut .number { color: #ffaf87; }
+#dumpTextOut .boolean { color: #ffd75f; }
+#dumpTextOut .null { color: #999; }
+
+.container-t1 {
+    margin: 8px; 
+    border: 1px solid #ccc; 
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+}

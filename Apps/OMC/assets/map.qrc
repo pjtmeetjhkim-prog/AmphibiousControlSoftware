@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/">
+    <file>assets/map/leaflet_map.html</file>
+    <file>assets/map/map.js</file>
+    <file>assets/map/map.css</file>
+  </qresource>
+</RCC>

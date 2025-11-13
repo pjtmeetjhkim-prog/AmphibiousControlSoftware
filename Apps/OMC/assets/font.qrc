@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="font">
+    <file>font/DungGeunMo.ttf</file>
+    <file>font/D2Coding-Ver1.3.2-20180524.ttf</file>
+  </qresource>
+</RCC>

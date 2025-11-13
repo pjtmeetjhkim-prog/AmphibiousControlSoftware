@@ -1,0 +1,25 @@
+{
+    "currentSelectUnit": 1,
+    "cam": {
+        "enable": false,
+        "irCameraUrl": "rtsp://192.168.10.81:4000/ir",
+        "cameraUrl": "rtsp://192.168.10.81:3000/eo"
+    },
+    "imageDetectionServer": {
+        "enable": false,
+        "ip": "localhost",
+        "port": 8085
+    },
+    "isSoundOn": false,
+    "fullscreen": true,
+    "mmsServer": {
+        "enable": true,
+        "ip": "localhost",
+        "port": 8282
+    },
+    "robotControlServer": {
+        "enable": true,
+        "ip": "localhost",
+        "port": 8283
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "currentSelectUnit": 0,
+    "cam": {
+        "enable": false,
+        "irCameraUrl": "http://localhost:8081/stream",
+        "cameraUrl": "http://localhost:8080/stream"
+    },
+    "imageDetectionServer": {
+        "enable": false,
+        "ip": "localhost",
+        "port": 8085
+    },
+    "isSoundOn": false,
+    "fullscreen": true,
+    "mmsServer": {
+        "enable": false,
+        "ip": "localhost",
+        "port": 8282
+    },
+    "robotControlServer": {
+        "enable": false,
+        "ip": "localhost",
+        "port": 8283
+    }
+}

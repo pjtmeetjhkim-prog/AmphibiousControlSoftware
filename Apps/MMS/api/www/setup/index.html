@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <h1>MMS Setup</h1>
+
+    <div style="
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 300px;
+        background-color: blue;
+        width: 320px;
+        color: white;
+    ">
+
+        <form action="/setup" method="post">
+
+            <div>
+                <label for="api-ip">API IP</label>
+                <input id="api-ip" type="text" placeholder="API IP" />
+            </div>
+
+            <div>
+                <label for="api-port">API Port</label>
+                <input id="api-port" type="text" placeholder="API Port" />
+            </div>
+
+            <div>
+                <label for="auth-token">Auth Token</label>
+                <input id="auth-token" type="text" placeholder="Auth Token" />
+            </div>
+
+
+
+            <button type="submit">Save</button>
+
+        </form>
+
+    </div>
+
+    <script>
+
+        const mmsConfig = JSON.parse(localStorage.getItem('mmsConfig')) || {};
+        document.getElementById('api-ip').value = mmsConfig.apiIp || '';
+        document.getElementById('api-port').value = mmsConfig.apiPort || '';
+        document.getElementById('auth-token').value = mmsConfig.authToken || '';
+
+
+        const form = document.querySelector('form');
+
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const apiIp = document.getElementById('api-ip').value;
+            const apiPort = document.getElementById('api-port').value;
+            const authToken = document.getElementById('auth-token').value;
+
+            const newConfig = {
+                apiIp,
+                apiPort,
+                authToken
+            };
+            localStorage.setItem('mmsConfig', JSON.stringify(newConfig));
+        });
+
+    </script>
+
+</body>
+
+</html>

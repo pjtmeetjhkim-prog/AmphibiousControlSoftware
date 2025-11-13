@@ -1,0 +1,239 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    
+}
+
+
+#main-frame {
+    position: absolute;
+    width: 1920px;
+    height: 1080px;    
+    transform: scale(0.8,0.8);
+    /* transform-origin: top left; */
+}
+
+#app-title {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 10;
+}
+
+
+
+.debug-border {
+    border: 1px solid rgb(0, 0, 0);
+}
+
+#robot-status-frame {
+    position: absolute;
+    transform: translate(0px, 0px);
+    width: 900px;
+    height: 140px;
+    background-color: #f0f0f0;
+    margin: 4px;
+}
+
+#robot-mm-selection-frame .unit-selection-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    height: 70px;
+}
+
+#robot-target-detection {
+    width: 900px;
+    height: 640px;
+    transform: translate(0px,165px);
+    margin: 2px;
+}
+
+.detection-status-box {
+    width: 280px;
+    height: 580px;
+    margin: 4px;
+    float: left;
+
+    display: flex;             /* flex로 내부 정렬 구조 전환 */
+    flex-direction: column;    /* 세로 방향 배치 */
+}
+
+.detection-status-box .image-box {
+    flex: 1;                   /* 남은 영역을 꽉 채움 */
+    background-color: lightgray;
+    margin-top: 6px;           /* 위쪽 여백 (정보 영역과 간격) */
+}
+
+
+#robot-mission-management-frame {
+    position: absolute;
+    transform: translate(0px, 164px);
+    width: 1910px;
+    height: 260px;
+    margin: 4px;
+    background-color: #f0f0f0;
+}
+
+#robot-mission-management-frame .content-frame {
+    display: flex;
+    flex-direction: row;        
+}
+
+#robot-mission-management-frame .content-frame .left-side {
+    width: 500px;    
+}
+
+#robot-mission-management-frame .content-frame .right-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 4px;
+    flex: 1;
+}
+
+#robot-mission-management-frame .content-frame .right-side button {
+    width: 96px;
+    height: 90px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out; /* 부드러운 전환 */
+}
+
+#robot-mission-management-frame .content-frame .right-side button.stop-mission-btn {
+    background-color: red;
+    color: white;
+}
+
+
+/* 마우스를 올렸을 때 (hover) */
+#robot-mission-management-frame .content-frame .right-side button.stop-mission-btn:hover {
+    background-color: #c30000; /* 약간 어두운 톤 */
+}
+
+/* 클릭했을 때 (active) */
+#robot-mission-management-frame .content-frame .right-side button.stop-mission-btn:active {
+    background-color: #a00000;
+    transform: scale(0.96); /* 살짝 눌리는 효과 */
+}
+
+/* 포커스 받았을 때 (tab 키 등) */
+#robot-mission-management-frame .content-frame .right-side button.stop-mission-btn:focus {
+    outline: 2px solid #ffaaaa;
+    outline-offset: 2px;
+}
+
+#robot-mission-management-frame .box {
+    width: 620px;
+    height: 220px;
+    margin: 4px;
+    float: left;
+    background-color: white;
+}
+
+#robot-mission-management-frame .mode-item {
+
+    height: 88px;
+    margin: 6px;
+    background-color: lightgray;
+}
+
+#robot-mission-management-frame .operation-mode-group {
+    display: flex;
+    background-color: white;
+    width: 98%;
+    height: 60%;
+    margin-left: 4px;
+    align-items: center;
+    justify-content: center;
+}
+
+#robot-mission-management-frame .operation-mode-group input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    margin-left: 24px;
+}
+
+#robot-mission-management-frame .mission-mode-group {
+    display: flex;
+    background-color: white;
+    width: 98%;
+    height: 60%;
+    margin-left: 4px;
+    align-items: center;
+    justify-content: center;
+}
+
+#robot-mission-management-frame .mission-mode-group input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    margin-left: 24px;
+}
+
+#map-frame {
+    position: absolute;
+    transform: translate(904px, -646px);
+    width: 1006px;
+    height: 804px;
+    margin: 4px;
+    background-color: #e0e0e0;
+}
+
+.no-data-banner {
+  background: rgba(30,30,30,.85);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+
+
+
+.leaflet-tooltip.wp-index-label{
+  background: transparent;    /* ✅ 배경 제거 */
+  border: none;               /* ✅ 테두리 제거 */
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  color: #111;
+  text-shadow: 0 0 3px #fff, 0 0 2px #fff;  /* 지형 위에서도 잘 보이게 */
+  pointer-events: none;        /* 라벨은 클릭 불가 */
+}
+
+
+/* 로봇 인덱스 라벨 스타일 */
+.leaflet-tooltip.robot-index-label {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+
+  /* 글꼴 스타일 */
+  font-weight: 800;         /* 굵게 */
+  font-size: 16px;          /* 크게 */
+  line-height: 1;
+  color: #111;
+
+  /* 아이콘과의 간격 미세조정 */
+  transform: translateY(-2px);
+
+  /* 지도 위에서도 잘 보이도록 외곽선 효과 */
+  text-shadow:
+    -1px -1px 0 rgba(255,255,255,0.9),
+     1px -1px 0 rgba(255,255,255,0.9),
+    -1px  1px 0 rgba(255,255,255,0.9),
+     1px  1px 0 rgba(255,255,255,0.9);
+}

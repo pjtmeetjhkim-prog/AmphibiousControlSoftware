@@ -1,0 +1,19 @@
+{
+  "init": true,
+  "currentSelectUnit": 0,
+  "numberOFUnits": 2,
+  "robot_1": {
+    "operation_mode": "auto",
+    "mission_mode": "move",
+    "waypoints": [],
+    "goalpoint": []
+  },
+  "robot_2": {
+    "operation_mode": "manual",
+    "mission_mode": "stop"
+  },
+  "robot_3": {
+    "operation_mode": "manual",
+    "mission_mode": "stop"
+  }
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <title> Server Admin Tool </title>
+</head>
+
+<body>
+
+    <div id="config-panel" class="container-t1" >
+
+        <label for="input-host">Host:</label>
+        <input type="text" id="input-host" placeholder="Host" value="localhost">
+
+        <label for="input-port">Port:</label>
+        <input type="text" id="input-port" placeholder="Port" value="8080">
+
+        <label for="input-auth-token">Auth Token:</label>
+        <input type="text" id="input-auth-token" placeholder="Auth Token" value="secret_token">
+
+        <div>
+            <button id="btn-save-config">Save Config</button>
+            <button id="btn-reset-config">Reset Config</button>
+        </div>
+
+    </div>
+
+
+    <div id="data-dumper-container" class="container-t1">
+
+        <button id="btndump" style="margin: 4px;" >Dump</button>
+        <div id="dumpTextOut"
+            style="height: 300px; background-color: black; color: green; overflow: auto;">
+
+        </div>
+
+    </div>
+
+    <div class="container-t1" id="set-metadata">
+        <button id="btn-set-metadata" style="margin: 4px;" >Set Metadata</button>
+        <div class="container-t1" style="flex-direction:row;">
+            <input 
+            style="flex:1; margin-right:4px;"
+            type="text" id="input-metadata-key" placeholder="Metadata Key" value="example_key">
+            <input 
+            style="flex:2; margin-right:4px;"
+            type="text" id="input-metadata-value" placeholder="Metadata Value" value="example_value">
+        </div>
+        
+    </div>
+
+
+
+    <script type="module">
+        import main from './index.js';
+        main(); 
+    </script>
+
+</body>
+
+</html>

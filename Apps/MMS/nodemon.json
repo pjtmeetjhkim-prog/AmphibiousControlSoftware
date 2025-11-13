@@ -1,0 +1,12 @@
+{
+    "ignore": 
+    [ "package.json",
+      "./node_modules/*",
+      "./media/*",
+      "./webrtc/*",
+      "./api/www/*",
+      "./temp/*",
+      "./uploads/*"
+    ],
+    "exec": "node index.js"
+  }
