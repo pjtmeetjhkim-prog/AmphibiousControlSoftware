@@ -6,7 +6,8 @@
     "operation_mode": "auto",
     "mission_mode": "move",
     "waypoints": [],
-    "goalpoint": []
+    "goalpoint": [],
+    "status_data": {}
   },
   "robot_2": {
     "operation_mode": "manual",
