@@ -1,0 +1,53 @@
+{
+  "init": true,
+  "currentSelectUnit": 0,
+  "numberOFUnits": 3,
+  "robot_1": {
+    "operation_mode": "operator",
+    "mission_mode": "stop",
+    "waypoints": [
+      {
+        "lat": 37.58444593976859,
+        "lng": 126.93830966283585
+      },
+      {
+        "lat": 37.58937700709153,
+        "lng": 126.97800635505442
+      },
+      {
+        "lat": 37.57016100484251,
+        "lng": 127.00525759782067
+      },
+      {
+        "lat": 37.55400212162329,
+        "lng": 126.9885206140745
+      },
+      {
+        "lat": 37.55502278635211,
+        "lng": 126.949467652
+      },
+      {
+        "lat": 37.54328429801165,
+        "lng": 126.95547580001147
+      },
+      {
+        "lat": 37.55264121357307,
+        "lng": 126.92800998053049
+      }
+    ],
+    "goalpoint": [
+      {
+        "lat": 37.55264121357307,
+        "lng": 126.92800998053049
+      }
+    ]
+  },
+  "robot_2": {
+    "operation_mode": "manual",
+    "mission_mode": "stop"
+  },
+  "robot_3": {
+    "operation_mode": "manual",
+    "mission_mode": "stop"
+  }
+}
