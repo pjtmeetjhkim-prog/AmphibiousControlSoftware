@@ -151,7 +151,7 @@ export class TcpServer {
       : path.resolve(process.cwd(), "data");
   }
   #getMetaFile() {
-    return path.join(this.#getMetaDir(), "metadata_central.json");
+    return path.join(this.#getMetaDir(), "metadata_robot.json");
   }
   #ensureDir(dirPath) {
     if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });

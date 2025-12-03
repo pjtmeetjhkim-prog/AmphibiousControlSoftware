@@ -1,16 +1,19 @@
-"""
-filename: MainForm.py
-author: gbox3d
-
-위 주석을 수정하지 마시오
-"""
 import sys
 from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtCore import Signal, Slot,QTimer, Qt
 from PySide6.QtGui import QFontDatabase
 from PySide6.QtGui import QImage, QPixmap
 
+import csv 
+import json
+import os, subprocess
+import http.client
+import msvcrt
+from datetime import datetime
+
 import UI.reference.mainForm
+import UI.reference.mainForm_modify
+
 from utils.cssutils import change_background_color, change_text_color
 from utils.my_qt_utils import match_widget_to_parent
 from configMng import ConfigManager
@@ -30,8 +33,8 @@ from dectector.video_thread import VideoThread
 from dectector.videoFrame import VideoDialog       
 
 from utils.utils import parse_command_line
-
-class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
+#class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
+class MainForm(QWidget, UI.reference.mainForm_modify.Ui_mainForm):
     
     gotoHomeSignal = Signal()
     gotoSetupSignal = Signal()
@@ -48,6 +51,9 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
         
         # # UI 설정
         self.setupUi(self)
+
+        # 인가자 등록 
+        #self.joinRegister = UI.reference.MemberSettingFormDialog(self)
 
         # 설정 관리자 초기화
         self._initialize_config()  
@@ -148,7 +154,6 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
         self.initControlKeyPadUI() # 키패드 UI 초기화
 
         self._initialize_controllers()
-
         
         self.mapUpdateRequested.connect(
             lambda lat, lon, heading, center:
@@ -160,6 +165,10 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
 
         self.pushButton_cmd_Send.clicked.connect(self.OnSendCustomCommand)
         self.btnZoomIn.clicked.connect(self.onClickedBtnZoomInMainScreen)
+        
+        #waring command
+        self.btnWaringSend.clicked.connect(self.onClickedWarningMessageSend)
+        self.btnWaringJoin.clicked.connect(self.onClickedWarningJoin)
 
     def _start_rtsp(self, url: str):
         """RTSP 스레드를 시작하고 프레임 신호를 UI에 연결"""
@@ -182,7 +191,7 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
                 self.addLog("[UI] RTSP stopped")
         except Exception as e:
             self.addLog(f"[UI] ❌ RTSP stop error: {e}")
-
+    
     @Slot(object)
     def _on_rtsp_frame(self, cv_img):
         """VideoThread에서 온 BGR 프레임을 QLabel/확대창에 반영"""
@@ -218,7 +227,6 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
         if self._video_dialog:
             self._video_dialog.close()
             self._video_dialog = None
-
 
     # --- MainForm 클래스 내부에 유틸 추가(아무 메서드 위든 OK) ---
     def _is_log_view_at_bottom(self) -> bool:
@@ -329,7 +337,7 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
             self.netMMS.fetch_json_by_key(key)   # ← 어댑터 래퍼 호출
 
             self.netMMS.set_json_by_key(
-                f"robot_{unit_no}.status_data",
+                f"robot_{unit_no}.robot_status_data",
                 self.current_robot_status)
 
 
@@ -442,14 +450,13 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
                 mission_mode=mission_mode,
                 operation_mode=operation_mode
             )
-
-
-
+            
     #===================== NetworkAdapter Robot ====================
     @Slot(dict)
     def _rbot_ui_on_connected(self, json_info: dict):
         print("[UI] Robot Connected:", json_info)
         self.addLog(f"[UI] Robot Connected. Info: {json_info}")
+    
     @Slot(str)
     def _rbot_ui_on_disconnected(self, reason: str):
         print("[UI] Robot Disconnected:", reason)
@@ -466,19 +473,16 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
     @Slot(dict)
     def _rbot_ui_on_push_update(self, json_info: dict):
         # print("[UI] Robot Push Update:", json_info)
-        """로봇 푸시 업데이트 처리
+        """로봇 푸시 업데이트 처리(명령)
         {
             'cmd': 'robot_update', 
             'data': {
-                'id': 1, 'x': 0, 'y': 0, 'angle': 0, 
-                'mode': 'manual', 'mission': 'stop', 
-                'wheelbase': 1.2, 'wheelRadius': 0.15, 'steerLimitDeg': 35, 'maxWheelRPM': 300, 
-                'WheelSpeed': 0, 'WheelAngle': 0, 'WheelOmega': 2, 'steerDeg': 0, 'v': 0, 
-                'longitude': 127, 'latitude': 37.5, 'originLon': 127, 'originLat': 37.5, 
-                'metersPerDeg': 111320
+                'id': 1, 'desiredXspeed': 0, 'desiredYspeed': 0, 'desiredRpos': 0, 
+                'demand_mode': 'manual', 'demand_mission': 'stop', 
+                'waypoints':[],
+                'emeState':0
             }
-        }
-        
+        }        
         """
         cmd = json_info.get("cmd", "")
         if cmd == "robot_update":
@@ -496,8 +500,6 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
                 self.label_battery_level.setText(f"{data.get('battPercent', 0)} %")
                 self.label_battery_temper.setText(f"{data.get('battTempC', 0)} °C")
                 self.label_battery_status.setText(f"{data.get('battState', 'N/A')}")
-
-
                 # print(f"dragStatus: {self.dragStatus}")
 
                 # _rbot_ui_on_push_update 내부 지도 갱신 부분
@@ -511,7 +513,6 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
                         # 자동센터 여부는 dragStatus로 제어
                         # if self.centerMap:
                         self.mapUpdateRequested.emit(self._last_lat, self._last_lon, self._last_heading, self.centerMap)
-
 
                 # 마지막 RPM 저장(이미 작성하신 라인 유지)
                 self._last_rpm = int(data.get("WheelSpeed", 0))
@@ -543,7 +544,7 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
         
         print(f"ConfigManager: 현재 선택된 차량 인덱스: {self.current_unit_index}")
         # print(f"ConfigManager: 현재 선택된 서브 차량 인덱스: {self.current_unit_index_sub}")       
-     
+
     def initControlKeyPadUI(self):
         """키패드 UI 초기화"""
         # 방향키 버튼
@@ -555,7 +556,7 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
         self.btnKeyLeft.released.connect(self.keyLeftReleased)
         self.btnKeyRight.pressed.connect(self.keyRightPressed)
         self.btnKeyRight.released.connect(self.keyRightReleased)
-          
+
         self.label_keyup_normal.setVisible(True)
         self.label_keyup_push.setVisible(False)
         self.label_keydown_normal.setVisible(True)
@@ -564,7 +565,7 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
         self.label_keyleft_push.setVisible(False)
         self.label_keyright_normal.setVisible(True)
         self.label_keyright_push.setVisible(False)
-      
+
     def _initialize_controllers(self):
         """컨트롤러 및 매니저 초기화"""
         # 상태 관리자
@@ -604,12 +605,21 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
         #     )
         
         # 지도 컨트롤러
+        # self.mapController = MapController()
+        # self.mapController.initialize_map(
+        #     self.widgetBottomRightScreen,
+        #     self.labelBottomRightScreen,
+        #     latitude=35.7299,
+        #     longitude=126.5833,
+        #     zoom=18
+        # )
+        
         self.mapController = MapController()
         self.mapController.initialize_map(
             self.widgetBottomRightScreen,
             self.labelBottomRightScreen,
-            latitude=35.7299,
-            longitude=126.5833,
+            latitude=36.121885,
+            longitude=129.414353,
             zoom=18
         )
 
@@ -630,13 +640,12 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
         if is_drag:
             self.centerMap = False
         print(f"[MAP][UI] dragStatus -> {self.dragStatus}")
-    
-    
+        
     @Slot()
     def gotoHome(self):
         print("gotoHome")
         self.gotoHomeSignal.emit()
-    
+
     @Slot()
     def gotoSetup(self):
         print("gotoSetup")
@@ -659,8 +668,6 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
                 omega_rad=2.0     # 조향각 변화율 (라디안/초 단위)
             )
 
-        
-    
     @Slot()
     def keyUpReleased(self):
         self.label_keyup_normal.setVisible(True)
@@ -713,8 +720,7 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
                 rpm=rpm,
                 angle_deg=25,
                 omega_rad=2.0
-            )
-        
+            )        
     
     @Slot()
     def keyLeftReleased(self):
@@ -743,8 +749,7 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
                 angle_deg=-25,
                 omega_rad=2.0
             )
-        
-    
+
     @Slot()
     def keyRightReleased(self):
         self.label_keyright_normal.setVisible(True)
@@ -758,8 +763,7 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
                 angle_deg=0,
                 omega_rad=2.0
             )
-        
-    
+
     # 비상정지 버튼
     @Slot()
     def btnAbnormalStopPressed(self):
@@ -854,7 +858,92 @@ class MainForm(QWidget, UI.reference.mainForm.Ui_mainForm):
     @Slot()
     def onClickedBtnZoomInBottomRightScreen(self):
         print("onClickedBtnZoomInBottomRightScreen")
-    
+                    
+    # 알림 메시지 인가자 등록 버튼
+    @Slot()
+    def onClickedWarningJoin(self):
+        try:           
+            # new_data = ['1029440324']
+            print("등록 하시겠습니까? (Y/N)")
+            excel_file_path = "./receivers.csv"         
+            subprocess.Popen(['start', 'excel', excel_file_path], shell=True)
+            
+            #with open(excel_file_path,"r",encoding="cp949") as f:
+            #    reader = csv.reader(f)
+            #    for idx, row in enumerate(reader):       
+            #        print(f"Seq:{idx+1} Number:{row[1]} 직함:{row[2]}_{row[3]}, 소속:{row[4]}")            
+                    #dic = {"Seq":f"{idx+1}","Number":f"{row[1]}"}
+                    #d = json.dumps(dic)
+                    ##print(d)
+                    # result.append(d)       
+            ## with open("./receivers.csv","a",newline='',encoding="utf-8") as f:
+            ##     writer = csv.writer(f)
+            ##     writer.writerow(new_data)
+        except AttributeError:
+            pass        
+
+    # 알림 메시지 전송 버튼
+    @Slot()
+    def onClickedWarningMessageSend(self):
+        try:
+            result = []
+            file_path = "./receivers.csv"
+            if not os.path.exists(file_path):
+                with open(file_path, 'w') as f:
+                    writer = csv.writer(f)
+                    new_data = ['1','1029440324']
+                    writer.writerow(new_data)                
+                    print(f"파일이 생성되었습니다: {file_path}")
+            else:
+                print(f"파일이 이미 존재합니다: {file_path}")
+                
+                
+            with open(file_path,"r",encoding="cp949") as f:
+                reader = csv.reader(f)
+                for idx, row in enumerate(reader):
+                    #print(f"Seq:{idx+1} Number:{row[1]}")
+                    dic = {"Seq":f"{idx}","Number":f"{row[1]}"}
+                    if(idx < 1):                    
+                        continue;                       
+                    d = json.dumps(dic)
+                    print(d)
+                    result.append(d)   
+
+            now = datetime.now()
+            
+            conn = http.client.HTTPSConnection("api.communis.kt.com")
+            payload = json.dumps({
+                "MessageSubType": "1",
+                "CallbackNumber": "15883391",
+                "Message":{
+                    "Content": f"[경고/알림_{now}] \n 수륙양용 지휘통제소에서 알립니다.\n 표적처리상태 알림 SMS 발송 테스트.\n",
+                    "Receivers": f"{result}"
+                }
+            })
+            headers = {
+                'Authorization': 'Basic Q1BTOTIwMDA1MTMxOFNSRlVGSDpTVks5MjAwMDUxMzE4REZNUUFK',
+                'Content-Type': 'application/json'
+            }
+            print("알림 발송", result)
+            conn.request("POST", "/cpaas/v1.0/CPaaS_sendSMS", payload, headers)
+            res = conn.getresponse()
+            data = res.read()
+            print(data.decode("utf-8"))
+            return;
+        
+            # print("알림을 보내시겠습니까? (Y/N)")
+            # req =  msvcrt.getch().decode('utf-8')
+            # if(req.upper() == "Y"):
+            #     print("알림 발송", result)
+            #     conn.request("POST", "/cpaas/v1.0/CPaaS_sendSMS", payload, headers)
+            #     res = conn.getresponse()
+            #     data = res.read()
+            #     print(data.decode("utf-8"))
+            # else:
+            #     print("알림발송 미승인")
+        except AttributeError:
+            pass    
+                
     # ==================== 종료 처리 ====================    
     def safeDestroy(self):        
         if getattr(self, "_dead", False):

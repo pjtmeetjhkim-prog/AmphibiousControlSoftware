@@ -37,18 +37,18 @@ async function main() {
     console.log(`[META] no file yet: ${metaLoad.path} (start with empty metadata)`);
   }
 
-  // geo 기준점 준비 (metadata.geo에 저장)
-  if (!tcp.metadataJson.geo) {
-    tcp.metadataJson.geo = {
-      originLon: 127.0,
-      originLat: 37.5,
+  // geo 기준점 준비 (metadata.geo_ref에 저장)
+  if (!tcp.metadataJson.geo_ref) {
+    tcp.metadataJson.geo_ref = {
+      originLon: 129.41462,
+      originLat: 36.12145,
       metersPerDeg: 111320
     };
   }
 
   // 로봇 생성 시 기준점 전달
-  const seed = { ...(tcp.metadataJson.robot ?? {}), ...(tcp.metadataJson.geo ?? {}) };
-  const robot = Robot.fromMetadata({ robot: seed, geo: tcp.metadataJson.geo });
+  const seed = { ...(tcp.metadataJson.robot ?? {}), ...(tcp.metadataJson.geo_ref ?? {}) };
+  const robot = Robot.fromMetadata({ robot: seed, geo_ref: tcp.metadataJson.geo_ref });
 
   // ✅ control_robot 콜백 등록
   tcp.registerJsonHandler("control_robot", async (obj, { tcp }) => {

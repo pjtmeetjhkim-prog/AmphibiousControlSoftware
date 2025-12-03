@@ -1,9 +1,11 @@
 {
     "currentSelectUnit": 1,
     "cam": {
-        "enable": false,
+        "enable": false,        
         "irCameraUrl": "rtsp://192.168.10.81:4000/ir",
-        "cameraUrl": "rtsp://192.168.10.81:3000/eo"
+        "cameraUrl": "rtsp://192.168.10.81:3000/eo",
+        "ip": "192.168.10.81",
+        "port": "13301"
     },
     "imageDetectionServer": {
         "enable": false,

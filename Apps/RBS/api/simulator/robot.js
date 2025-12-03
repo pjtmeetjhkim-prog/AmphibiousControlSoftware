@@ -144,6 +144,15 @@ export class Robot {
     }
   }
 
+    /** 메타/상태 패치 */
+  applyC4I_Patch(p = {}) {
+    if ("operate_mode" in p) this.x = Number(p.x);
+    if ("mission_mode" in p) this.y = Number(p.y);
+    if ("confidence" in p) this.headingDeg = Number(p.angle);
+    if ("detect_class" in p) this.mode = String(p.mode);
+    if ("detect_name" in p) this.mission = String(p.mission);
+  }
+
   // ===== 시뮬레이션 1 step =====
   update(dt) {
     if (dt <= 0) return;
@@ -264,6 +273,22 @@ export class Robot {
       battState:   this.#healthToCode(this.battHealth),    // 0=normal,1=warm,2=hot,3=critical
       battHealth:  this.battHealth                          // 텍스트 라벨
 
+    };
+  }
+
+  
+  toC4I_JSON() {
+    return {
+      robotId: this.id,
+      //operate & mission mode
+      operate_mode: this.operate_mode, 
+      mission_mode: this.mission_mode,
+      //
+      detector_data:{
+        confidence: this.confidence,
+        detect_class: this.detect_class,
+        detect_name: this.detect_name
+      }
     };
   }
 

@@ -129,7 +129,7 @@ background-color: transparent;
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../assets/icons.qrc">:/홈.png</pixmap>
+      <pixmap>:/홈.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -226,7 +226,7 @@ background-color: transparent;
    <widget class="QLabel" name="label_10">
     <property name="geometry">
      <rect>
-      <x>1390</x>
+      <x>1330</x>
       <y>0</y>
       <width>72</width>
       <height>72</height>
@@ -241,7 +241,7 @@ margin : 16px
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap resource="../assets/icons.qrc">:/플랫폼로봇.png</pixmap>
+     <pixmap>:/플랫폼로봇.png</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -253,7 +253,7 @@ margin : 16px
    <widget class="QLabel" name="txUnitNuberInfo">
     <property name="geometry">
      <rect>
-      <x>1600</x>
+      <x>1410</x>
       <y>0</y>
       <width>120</width>
       <height>72</height>
@@ -305,7 +305,7 @@ padding : 4px;</string>
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../assets/icons.qrc">:/설정.png</pixmap>
+      <pixmap>:/설정.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -327,6 +327,32 @@ padding : 4px;</string>
       <string/>
      </property>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="btnWaringJoin">
+    <property name="geometry">
+     <rect>
+      <x>1730</x>
+      <y>5</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>인가자 등록</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnWaringSend">
+    <property name="geometry">
+     <rect>
+      <x>1720</x>
+      <y>35</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>경고 메시지 발송</string>
+    </property>
    </widget>
   </widget>
   <widget class="QWidget" name="mainCamScreen" native="true">
@@ -361,7 +387,7 @@ margin : 4px;</string>
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap resource="../assets/icons.qrc">:/강수량.png</pixmap>
+     <pixmap>:/강수량.png</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -405,7 +431,7 @@ margin : 4px;</string>
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../assets/icons.qrc">:/확대.png</pixmap>
+      <pixmap>:/확대.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -561,7 +587,7 @@ color : rgb(0,255,0);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="../assets/icons.qrc">:/방향키_하_기본.png</pixmap>
+       <pixmap>:/방향키_하_기본.png</pixmap>
       </property>
      </widget>
      <widget class="QLabel" name="label_keydown_push">
@@ -580,7 +606,7 @@ color : rgb(0,255,0);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="../assets/icons.qrc">:/방향키_하_누름.png</pixmap>
+       <pixmap>:/방향키_하_누름.png</pixmap>
       </property>
      </widget>
      <widget class="QPushButton" name="btnKeyDown">
@@ -622,7 +648,7 @@ color : rgb(0,255,0);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="../assets/icons.qrc">:/방향키_좌_기본.png</pixmap>
+       <pixmap>:/방향키_좌_기본.png</pixmap>
       </property>
      </widget>
      <widget class="QLabel" name="label_keyleft_push">
@@ -641,7 +667,7 @@ color : rgb(0,255,0);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="../assets/icons.qrc">:/방향키_좌_누름.png</pixmap>
+       <pixmap>:/방향키_좌_누름.png</pixmap>
       </property>
      </widget>
      <widget class="QPushButton" name="btnKeyLeft">
@@ -683,7 +709,7 @@ color : rgb(0,255,0);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="../assets/icons.qrc">:/방향키_상_기본.png</pixmap>
+       <pixmap>:/방향키_상_기본.png</pixmap>
       </property>
      </widget>
      <widget class="QLabel" name="label_keyup_push">
@@ -702,7 +728,7 @@ color : rgb(0,255,0);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="../assets/icons.qrc">:/방향키_상_누름.png</pixmap>
+       <pixmap>:/방향키_상_누름.png</pixmap>
       </property>
      </widget>
      <widget class="QPushButton" name="btnKeyUp">
@@ -744,7 +770,7 @@ color : rgb(0,255,0);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="../assets/icons.qrc">:/방향키_우_기본.png</pixmap>
+       <pixmap>:/방향키_우_기본.png</pixmap>
       </property>
      </widget>
      <widget class="QLabel" name="label_keyright_push">
@@ -763,7 +789,7 @@ color : rgb(0,255,0);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="../assets/icons.qrc">:/방향키_우_누름.png</pixmap>
+       <pixmap>:/방향키_우_누름.png</pixmap>
       </property>
      </widget>
      <widget class="QPushButton" name="btnKeyRight">

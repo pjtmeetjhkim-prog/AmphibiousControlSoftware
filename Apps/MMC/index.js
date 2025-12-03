@@ -12,11 +12,11 @@ import {
     setAuthToken
 } from "/libs/apiHelper.js";
 
-
 import {
     initMap, updateMapWithStatusData,
     showNoLocationBanner, hideNoLocationBanner,
-    updateWaypointsForUnit, updateGoalpointsForUnit,enableCtrlClickToAppendGoalpoint,_getSelectedUnitIndex1,_getGoalpoints,_getWaypoints
+    updateWaypointsForUnit, updateGoalpointsForUnit, enableCtrlClickToAppendGoalpoint, _getSelectedUnitIndex1, _getGoalpoints, _getWaypoints,
+    _clearWaypointLayers
 } from "./mapView.js";
 
 //import * as apiModule from "/libs/apiHelper.js";
@@ -27,9 +27,9 @@ const INIT_DATA = {
     init: true,
     currentSelectUnit: 0,
     numberOFUnits: 3,
-    robot_1: { operation_mode: "manual", mission_mode: "stop", waypoints: [], goalpoint:[]},
-    robot_2: { operation_mode: "manual", mission_mode: "stop", waypoints: [], goalpoint:[]},
-    robot_3: { operation_mode: "manual", mission_mode: "stop", waypoints: [], goalpoint:[]}
+    robot_1: { operation_mode: "manual", mission_mode: "stop", waypoints: [], goalpoint: [] },
+    robot_2: { operation_mode: "manual", mission_mode: "stop", waypoints: [], goalpoint: [] },
+    robot_3: { operation_mode: "manual", mission_mode: "stop", waypoints: [], goalpoint: [] }
 };
 
 // --- 한글표 변환 테이블 ---
@@ -73,6 +73,15 @@ export class MMCApp {
         this.getRobotMissionStopButton = () =>
             document.querySelector('.stop-mission-btn');
 
+        this.setBroadcastWaringButton = () =>
+            document.querySelector('.waring-broadcast-btn');
+        // this.setWaringSendButton = () =>
+        //     document.querySelector('.waring-sms-btn');
+        // this.setWaringJoinButton = () =>
+        //     document.querySelector('.waring-join-btn');
+
+        this.connectControlInterfaceButton = () =>
+            document.querySelector('.c4i-connect-btn');
         // --- 내부 상태 ---
         this.polling = false;
         this.pollInterval = 1000;
@@ -98,10 +107,17 @@ export class MMCApp {
         this.#bindRobotGoalPointSetter();
         this.#bindRobotGoalStopSetter();
 
+        //경고&알람시스템
+        this.#bindWaringBroadcast();
+        // this.#bindWaringMessageSetter();
+        // this.#bindWaringJoinSetter();
+        //C4I 체계연동
+        this.#bindControlInterface();
+
         // 초기 로봇 운용 갯수 세팅
-        const resNum = await  getMetadataByKey("numberOFUnits");
+        const resNum = await getMetadataByKey("numberOFUnits");
         if (resNum?.value) {
-            const inp = this. getRobotCountInput();
+            const inp = this.getRobotCountInput();
             if (inp) inp.value = resNum.value;
         }
 
@@ -116,9 +132,9 @@ export class MMCApp {
             const sel = await getMetadataByKey("currentSelectUnit");
             const unitIdx1 = ((sel?.value ?? 0) | 0) + 1; // 1-based
             await updateGoalpointsForUnit(unitIdx1);   // 초기 골포인트 로드
-            //await updateWaypointsForUnit(unitIdx1);    // 초기 웨이포인트 로드
+            await updateWaypointsForUnit(unitIdx1);    // 초기 웨이포인트 로드
 
-            const resOther = await getMetadataByKey(`robot_${unitIdx1}.status_data`);
+            const resOther = await getMetadataByKey(`robot_${unitIdx1}.robot_status_data`);
             const statusOther = resOther?.value;
             if (statusOther && typeof statusOther === "object") {
                 // ✅ 1-based 인덱스로 호출, 선택된 로봇은 센터 이동
@@ -128,7 +144,7 @@ export class MMCApp {
                 showNoLocationBanner(`선택된 호기(${unitIdx1})의 위치 데이터 없음`);
             }
 
-        } catch (e) { 
+        } catch (e) {
             console.error("[INITIAL MAP SETUP ERROR]", e);
         }
 
@@ -233,13 +249,13 @@ export class MMCApp {
 
                     // ✅ 선택 유닛 웨이포인트 재렌더
                     try {
-                        await updateGoalpointsForUnit(unitIdx1);  
-                        await updateWaypointsForUnit(unitIdx1); 
-                    } catch (_) {}
+                        await updateGoalpointsForUnit(unitIdx1);
+                        await updateWaypointsForUnit(unitIdx1);
+                    } catch (_) { }
 
                     // ✅ 선택 유닛의 status_data가 있다면 그 로봇만 센터 이동
                     try {
-                        const resS = await getMetadataByKey(`robot_${unitIdx1}.status_data`);
+                        const resS = await getMetadataByKey(`robot_${unitIdx1}.robot_status_data`);
                         const s = resS?.value;
                         if (s && typeof s === "object") {
                             hideNoLocationBanner();
@@ -281,17 +297,15 @@ export class MMCApp {
 
         btn.addEventListener("click", async () => {
             console.log("임무 명령 재개.");
-            try {              
+            try {
                 const unitIndex1 = await _getSelectedUnitIndex1();
                 const gps = await _getGoalpoints(unitIndex1);
-                if (!gps.length && (gps.lat == null || gps.lng ==null)){                  
+                if (!gps.length && (gps.lat == null || gps.lng == null)) {
                     alert("로봇 목표점을 설정 후 수행하십시오.");
                     return;
                 }
-                //const newGps = [...gps, { lat, lng }];
                 const res = await mergeMetadata({ [`robot_${unitIndex1}`]: { goalpoint: gps } });
                 await saveMetadata();
-                //console.log(`[goalpoints] add robot_${unitIndex1}:`, { gps.value.lat , gps.lng });
                 console.log("[MERGE METADATA RESPONSE]", res);
                 alert("로봇 임무 명령 재개");
             } catch (err) {
@@ -300,21 +314,23 @@ export class MMCApp {
         });
     }
 
-    #bindRobotGoalStopSetter(){
+    #bindRobotGoalStopSetter() {
         const btn = this.getRobotMissionStopButton();
         if (!btn) return;
 
         console.log("임무 명령 정지.");
         btn.addEventListener("click", async () => {
-            try {                
+            try {
                 const unitIndex1 = await _getSelectedUnitIndex1();
                 const res = await mergeMetadata({ [`robot_${unitIndex1}`]: { goalpoint: [] } });
-                await saveMetadata();             
+                await saveMetadata();
                 await updateGoalpointsForUnit(unitIndex1);
 
                 //console.log(`[goalpoints] stop robot_${unitIndex1}:`, { lat, lng });
                 console.log("[MERGE METADATA RESPONSE]", res);
                 alert("로봇 임무 명령 정지");
+                const container = this.getModeContainer();
+                
             } catch (err) {
                 console.error("[MERGE METADATA ERROR]", err);
             }
@@ -368,9 +384,160 @@ export class MMCApp {
         if (el) el.innerText = text;
     }
 
+    //------------경고알람---------
+    #bindWaringBroadcast() {
+        const btn = this.setBroadcastWaringButton(); //
+        if (!btn) return;
+
+        btn.addEventListener("click", async () => {
+            console.log("경고알람방송 활성화.");
+            try {
+                alert("경고/알람 방송창 활성화");
+                window.open('https://192.168.10.97', 'newWindow')
+            } catch (err) {
+                console.error("[경고/알람 방송 활성화 실패]", err);
+            }
+        });
+    }
+
+    // #bindWaringMessageSetter() {
+    //     const btn = this.setWaringSendButton(); //
+    //     if (!btn) return;
+
+    //     btn.addEventListener("click", async () => {
+    //         console.log("경고알람 메시지 활성화.");
+    //         try {
+    //             alert("경고/알람 메시지 전송");
+    //             this.#sendWaringMessage();
+
+    //         } catch (err) {
+    //             console.error("[경고/알람 메시지 전송 실패]", err);
+    //         }
+    //     });
+    // }
+
+    // #bindWaringJoinSetter() {
+    //     const btn = this.setWaringJoinButton(); //
+    //     if (!btn) return;
+
+    //     btn.addEventListener("click", async () => {
+    //         console.log("경고알람 메시지 인가자 등록 활성화.");
+    //         try {
+    //             alert("경고/알람 시스템 인가자 등록");
+    //         } catch (err) {
+    //             console.error("[경고/알람 시스템 인가자 등록 실패]", err);
+    //         }
+    //     });
+    // }
+
+    // async #sendWaringMessage() {
+    //     try {            
+    //         // 1. receivers.csv 파일 내용 읽기
+    //         // 브라우저 환경이므로, 서버에서 파일을 제공하거나 
+    //         // 해당 파일이 공용 경로에 있다고 가정하고 fetch를 사용합니다.
+    //         const csvResponse = await fetch("./receivers.csv");
+    //         if (!csvResponse.ok) {
+    //             throw new Error(`Failed to fetch receivers.csv: ${csvResponse.statusText}`);
+    //         }
+    //         const csvText = await csvResponse.text();
+
+    //         console.log("인가자 정보 읽기.",csvText);
+    //         // 2. CSV 파싱 및 JSON 포맷 준비
+    //         const result = [];
+    //         const rows = csvText.trim().split('\n');
+    //         rows.forEach((row, idx) => {
+    //             // CSV는 쉼표로 구분되어 있다고 가정
+    //             const columns = row.split(',').map(col => col.trim());
+    //             if (columns.length >= 2) {
+    //                 const dic = {
+    //                     "Seq": `${idx + 1}`,
+    //                     "Number": columns[1] // 전화번호
+    //                 };
+    //                 // Python 코드와 달리, JavaScript에서는 배열에 객체 자체를 저장 후 
+    //                 // JSON.stringify로 전체를 직렬화하는 것이 더 일반적입니다.
+    //                 result.push(dic);
+    //             }
+    //         });
+    //         console.log("인가자 정보 읽기.",result);
+
+    //         // 3. 현재 시간 포맷
+    //         const now = new Date();
+    //         const nowString = now.toLocaleString('ko-KR', {
+    //             year: 'numeric', month: '2-digit', day: '2-digit',
+    //             hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    //         });
+
+    //         // 4. API 요청 Payload 구성
+    //         const payload = {
+    //             "MessageSubType": "1",
+    //             "CallbackNumber": "15883391",
+    //             "Message": {
+    //                 "Content": `[경고알림].${nowString} - \n
+    //                              - 수륙양용 지휘통제소에서 알립니다.\n
+    //                              - 시스템경고/알림 메시지 송부 \n
+    //                              - 임무 수행 경고 발생 \n`,
+    //                 // Python 예제와 동일하게 JSON 문자열로 변환하여 전송
+    //                 "Receivers": JSON.stringify(result)
+    //             }
+    //         };
+
+    //         const headers = {
+    //             // 'Authorization' 헤더는 보안상의 이유로 서버에서 처리하거나 
+    //             // CORS 문제를 해결해야 할 수 있습니다. 
+    //             // 일단 Python 코드와 동일하게 설정합니다.
+    //             'Authorization': 'Basic Q1BTOTIwMDA1MTMxOFNSRlVGSDpTVks5MjAwMDUxMzE4REZNUUFK',
+    //             'Content-Type': 'application/json'
+    //         };
+
+    //         // 5. 알림 확인 및 API 요청 (msvcrt.getch() 대체)
+    //         if (confirm("알림을 보내시겠습니까?")) {
+    //             console.log("알림 발송 시도:", result);
+
+    //             const apiResponse = await fetch("https://api.communis.kt.com/cpaas/v1.0/CPaaS_sendSMS", {
+    //                 method: "POST",
+    //                 headers: headers,
+    //                 body: JSON.stringify(payload)
+    //             });
+
+    //             const data = await apiResponse.json();
+
+    //             console.log("API 응답:", data);
+    //             if (apiResponse.ok && data.r === "ok") {
+    //                 alert("경고/알람 메시지 전송 성공!");
+    //             } else {
+    //                 alert(`경고/알람 메시지 전송 실패: ${data.r || apiResponse.statusText}`);
+    //             }
+    //         } else {
+    //             console.log("알림발송 미승인");
+    //             alert("알림발송 미승인");
+    //         }
+    //     } catch (err) {
+    //         console.error("waring message send err : ", err)
+    //     }
+    // }
+
     // ------------------------------
     //      Polling / Updates
     // ------------------------------
+    
+    #bindControlInterface(){
+        try {
+            const btn = this.connectControlInterfaceButton();
+            if(!btn) return;
+
+            btn.addEventListener("click", async()=>{
+                console.log("C4I 체계 연동 시도.");
+                try {                    
+                    alert("C4I 체계 연동 활성화");
+                } catch (error) {
+                    console.err("C4I 체계 연동 실패",err);                    
+                }
+            });
+        } catch (error) {
+            
+        }
+    }
+
     startPolling(intervalMs) {
         if (intervalMs) this.pollInterval = Math.max(200, intervalMs);
         if (this.polling) return;
@@ -438,7 +605,7 @@ export class MMCApp {
         const selected1 = selected0 + 1; // 1-based
 
         for (let i = 1; i <= unitCount; i++) {
-            const resOther = await getMetadataByKey(`robot_${i}.status_data`);
+            const resOther = await getMetadataByKey(`robot_${i}.robot_status_data`);
             const statusOther = resOther?.value;
             if (statusOther && typeof statusOther === "object") {
                 // ✅ 1-based 인덱스로 호출
@@ -449,21 +616,20 @@ export class MMCApp {
     }
 
     async #updateRobotWaypointsDataToMap(centerSelected = false) {
-        const unitCountRes = await getMetadataByKey("numberOFUnits");
-        const unitCount = unitCountRes?.value ?? 0;
+        //const unitCountRes = await getMetadataByKey("numberOFUnits");
+        //const unitCount = unitCountRes?.value ?? 0;
 
         const sel = await getMetadataByKey("currentSelectUnit");
         const selected0 = sel?.value ?? 0;
         const selected1 = selected0 + 1; // 1-based
-        
-        const wps = await _getWaypoints(selected1);      
-        const newWps = [...wps, { lat, lng }];
 
-        await mergeMetadata({ [`robot_${unitIndex1}`]: { waypoints: newWps } });
-        await saveMetadata();
-        await updateWaypointsForUnit(sel);
-    
-    //console.log(`[waypoints] add robot_${unitIndex1}:`, { lat, lng });  
+        const wps = await _getWaypoints(selected1);           
+        //if (typeof wps?.lat !== "number" || typeof wps?.lng !== "number") return;
+        if((wps.length == 0) && (typeof wps !== "object" || typeof wps?.lng !== "object")){                       
+            _clearWaypointLayers();
+            return;
+        }
+        await updateWaypointsForUnit(selected1);        
     }
 }
 

@@ -3,13 +3,38 @@
     // 기존 특성에 대한 설명을 보려면 가리킵니다.
     // 자세한 내용을 보려면 https://go.microsoft.com/fwlink/?linkid=830387을(를) 방문하세요.
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [       
         {
             "type": "chrome",
             "request": "launch",
             "name": "localhost에 대해 Chrome 시작",
             "url": "http://localhost:8080",
             "webRoot": "${workspaceFolder}"
+        },
+                {
+            "type": "node",
+            "request": "launch",
+            "name": "npm run dev (nodemon)",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev"
+            ],
+            "console": "integratedTerminal",
+            "restart": true,
+            "env": {
+                "NODE_ENV": "dev"
+            },
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "name": "app_omc",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Apps/OMC/mainForm.py",
+            "console": "integratedTerminal"
         }
     ]
 }

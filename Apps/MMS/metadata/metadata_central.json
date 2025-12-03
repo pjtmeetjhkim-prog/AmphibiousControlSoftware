@@ -4,16 +4,64 @@
   "numberOFUnits": 2,
   "robot_1": {
     "operation_mode": "auto",
-    "mission_mode": "move",
+    "mission_mode": "stop",
     "waypoints": [],
-    "goalpoint": []
+    "goalpoint": [],
+    "observe_data": {
+      "pan": 0,
+      "tilt": 0,
+      "trackState": 0
+    },
+    "dector_data": {
+      "boxes": [
+        {
+          "xy[0]": 37,
+          "xy[1]": 37,
+          "xy[3]": 37,
+          "xy[4]": 37
+        }
+      ],
+      "confidence": 0.77,
+      "class": 8,
+      "name": "boat"
+    },
+    "robot_status_data": {
+      "id": 1,
+      "x": 0,
+      "y": 0,
+      "angle": 0,
+      "mode": "auto",
+      "mission": "stop",
+      "wheelbase": 1.2,
+      "wheelRadius": 0.15,
+      "steerLimitDeg": 35,
+      "maxWheelRPM": 300,
+      "WheelSpeed": 0,
+      "WheelAngle": 0,
+      "WheelOmega": 2,
+      "steerDeg": 0,
+      "v": 0,
+      "vx": 0,
+      "vy": 0,
+      "longitude": 129.41462,
+      "latitude": 36.12145,
+      "originLon": 129.41462,
+      "originLat": 36.12145,
+      "metersPerDeg": 111320,
+      "battPercent": 96.3,
+      "battTempC": 24,
+      "battState": 0,
+      "battHealth": "normal"
+    }
   },
   "robot_2": {
     "operation_mode": "manual",
-    "mission_mode": "stop"
+    "mission_mode": "stop",
+    "waypoints": []
   },
   "robot_3": {
     "operation_mode": "manual",
-    "mission_mode": "stop"
+    "mission_mode": "stop",
+    "waypoints": []
   }
 }

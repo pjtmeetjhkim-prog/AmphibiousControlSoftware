@@ -1,0 +1,25 @@
+{
+  "init": true,
+  "currentSelectUnit": 0,
+  "numberOFUnits": 2,
+  "robot_1": {
+    "operation_mode": "auto",
+    "mission_mode": "move",
+    "waypoints": [],
+    "goalpoint": [
+      {
+        "lat": 37.55410227726309,
+        "lng": 126.99620069142397
+      }
+    ],
+    "status_data": {}
+  },
+  "robot_2": {
+    "operation_mode": "manual",
+    "mission_mode": "stop"
+  },
+  "robot_3": {
+    "operation_mode": "manual",
+    "mission_mode": "stop"
+  }
+}

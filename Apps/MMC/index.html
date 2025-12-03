@@ -12,12 +12,10 @@
 
 </head>
 
-<body>
-
+<body>   
     <div id="main-frame" class="debug-border">
-
         <span id="app-title">MMS(Mission Manager Server) WebGUI(r_2) <span id="version">0.0.0</span> </span>
-
+   
         <!-- 로봇 상태 전시 -->
         <div id="robot-status-frame">
             <div class="debug-border">
@@ -57,11 +55,41 @@
                 </div>
             </div>
         </div>
+     
+        <!-- 경고/알림 -->
+        <div id="nofication-waring-frame">
+            <div class="debug-border">                
+                <div style="margin: 2px; background-color: lightgray; height: 40px;">경고/알림 시스템</div>
+                <!-- <div style="background-color: lightgray; height: 35px; display: flex; transform: translate(1010px,10px);">경고/알림 시스템</div> -->
+                <div style="margin: 2px;">
+                    <div id="noti-select-frame" style="width: 240px;height: 25px; background-color: lightgray;">
+                        <div class="notificate-btn-group">
+                            <button class="waring-broadcast-btn" style="width: 150px;height: 25px">경고 방송 송출</button>
+                            <!-- <button class="waring-join-btn">인가자 등록</button>
+                            <button class="waring-sms-btn">알림 발송</button> -->
+                        </div>                
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- C4I -->
+        <div id="c4i-frame">
+            <div class="debug-border">                
+                <div style="margin: 2px; background-color: lightgray; height: 40px;">C4I 체계 연동</div>                
+                <div style="margin: 2px;">
+                    <div id="c4i-connect-frame" style="width: 240px;height: 25px; background-color: lightgray;">
+                        <div class="c4i-btn-group">
+                            <button class="c4i-connect-btn" style="width: 150px;height:25px">서버 연동 시도</button>
+                        </div>                
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- 표적처리결과 -->
         <div id="robot-target-detection" class="debug-border">
             <div style="background-color: gainsboro; height: 32px;margin: 2px;">표적처리결과</div>
-
             <div style="display: flex; transform: translate(8px,0px);">
 
                 <div class="debug-border detection-status-box" name="unit-1">
@@ -84,6 +112,7 @@
 
             </div>
         </div>
+
         <!-- 로봇 임무 관리 -->
         <div id="robot-mission-management-frame" class="debug-border">
             <div id="robot-operation-count"> <span>로봇 운용 개수 :</span> <input type="number" min="1" max="3" value="1">
@@ -198,13 +227,10 @@
 
         </div>
 
-
         <div id="map-frame" class="debug-border">
 
         </div>
-
     </div>
-
 
     <script type="module">
         import main from './index.js';

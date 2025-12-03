@@ -46,7 +46,7 @@ export async function _getGoalpoints(unitIndex1) {
   return Array.isArray(r?.value) ? r.value : [];
 }
 
-function _clearWaypointLayers() {
+export function _clearWaypointLayers() {
   if (_leaflet.layers.wpGroup) {
     _leaflet.layers.wpGroup.clearLayers();
     _leaflet.map.removeLayer(_leaflet.layers.wpGroup);
@@ -58,7 +58,7 @@ function _clearWaypointLayers() {
   }
 }
 
-function _clearGoalpointLayers() {
+export function _clearGoalpointLayers() {
   if (_leaflet.layers.gpGroup) {
     _leaflet.layers.gpGroup.clearLayers();
     _leaflet.map.removeLayer(_leaflet.layers.gpGroup);
@@ -107,7 +107,8 @@ async function _deleteSelectedMarker() {
   if (!m) return;
 
   // 마커에 저장해둔 인덱스로 삭제
-  const idx = m.__wpIndex;
+  //const idx = m.__wpIndex;
+  const idx = m.__gpIndex;
   const unitIndex1 = await _getSelectedUnitIndex1();
   //const wps = await _getWaypoints(unitIndex1);
   const goalpoints = await _getGoalpoints(unitIndex1);
@@ -205,11 +206,11 @@ export async function updateGoalpointsForUnit(unitIndex1) {
       permanent: true,
       direction: "top",
       offset: L.point(0, -24),
-      className: "wp-index-label",
+      className: "gp-index-label",
     });
 
     // 인덱스 보관(삭제/이동 시 사용)
-    m.__wpIndex = i;
+    m.__gpIndex = i;
 
     // 클릭 → 선택 표시
     m.on("click", (e) => {
@@ -223,7 +224,8 @@ export async function updateGoalpointsForUnit(unitIndex1) {
       const unitIdx1 = await _getSelectedUnitIndex1();
       const cur = await _getGoalpoints(unitIdx1);
 
-      const idx = e.target.__wpIndex;
+      //const idx = e.target.__wpIndex;
+      const idx = e.target.__gpIndex;
       if (Number.isInteger(idx) && idx >= 0 && idx < cur.length) {
         const newGps = cur.slice();
         newGps[idx] = { lat, lng };
@@ -236,7 +238,8 @@ export async function updateGoalpointsForUnit(unitIndex1) {
           let k = 0;
           _leaflet.layers.gpGroup.eachLayer((lyr) => {
             if (lyr instanceof L.Marker) {
-              lyr.__wpIndex = k;
+              //lyr.__wpIndex = k;
+              lyr.__gpIndex = k;              
               if (k === idx) _highlightSelectedMarker(lyr);
               k++;
             }
@@ -315,8 +318,9 @@ export function enableCtrlClickToAppendGoalpoint() {
 export async function initMap(opts = {}) {
   if (_leaflet.map) return _leaflet.map;
 
-  const center = Array.isArray(opts.center) ? opts.center : [37.5665, 126.9780];
-  const zoom = Number.isFinite(opts.zoom) ? opts.zoom : 13;
+  //const center = Array.isArray(opts.center) ? opts.center : [37.5665, 126.9780];
+  const center = Array.isArray(opts.center) ? opts.center : [36.121885, 129.414353];
+  const zoom = Number.isFinite(opts.zoom) ? opts.zoom : 15;
 
   _leaflet.map = L.map("map-frame").setView(center, zoom);
   _leaflet.layers.base = L.tileLayer(

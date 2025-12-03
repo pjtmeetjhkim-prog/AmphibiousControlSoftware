@@ -1,0 +1,24 @@
+{
+  "geo": {
+    "originLon": 127.045,
+    "originLat": 37.501,
+    "metersPerDeg": 111320
+  },
+  "robot": {
+    "id": 1,
+    "x": 0.0,
+    "y": 0.0,
+    "angle": 0.0,
+    "mode": "manual",
+    "mission": "stop",
+
+    "wheelbase": 1.2,
+    "wheelRadius": 0.15,
+    "steerLimitDeg": 35,
+    "maxWheelRPM": 300,
+
+    "WheelSpeed": 0,
+    "WheelAngle": 0,
+    "WheelOmega": 2.0
+  }
+}
