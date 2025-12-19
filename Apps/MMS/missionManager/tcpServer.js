@@ -53,7 +53,7 @@ class SocketReader {
     socket.on("close", () => { this.closed = true; this._flush(new Error("socket closed")); });
     socket.on("error", e => { this._flush(e); });
 
-    
+
   }
 
   _flush(err) {
@@ -103,6 +103,8 @@ export class TcpServer {
     this.server = null;
     this.sockets = new Set();
 
+    this.c4iSocket = null; // C4I 연결 관리용
+
     // 전역 상태
     this.metadataJson = {};
     this.imageBank = new Map(); // bank_id -> { data, type, seq, ts, size }
@@ -111,7 +113,7 @@ export class TcpServer {
     this.bootTsSec = Math.floor(Date.now() / 1000);
   }
 
-    // === 시간 유틸 ===
+  // === 시간 유틸 ===
   #pad2(n) { return String(n).padStart(2, "0"); }
 
   #formatDate(d) {
@@ -378,9 +380,9 @@ export class TcpServer {
               // ✅ 추가 필드: 현재시간/경과시간
               const now_time = this.#currentTimeString();
               const elapsed_time = this.#elapsedTimeString();
-              
-              await writer.send(buildJsonPacket(PUSH_JSON, { 
-                cmd: "all_metadata", 
+
+              await writer.send(buildJsonPacket(PUSH_JSON, {
+                cmd: "all_metadata",
                 data: snapshot,
                 now_time,
                 elapsed_time
@@ -499,5 +501,83 @@ export class TcpServer {
     } finally {
       closeWithLog();
     }
+  }
+
+  /**
+   * C4I 서버로의 외부 접속 요청 (MMC에서 호출됨)
+   */
+  async connectToC4I(ip, port) {
+    try {
+      if (this.c4iSocket && !this.c4iSocket.destroyed) {
+        console.log("[C4I] 이미 연결된 소켓이 있어 재연결을 위해 종료합니다.");
+        this.c4iSocket.destroy();
+      }
+
+      return new Promise((resolve, reject) => {
+        console.log(`[C4I] 서버 접속 시도: ${ip}:${port}`);
+
+        const socket = net.createConnection({ host: ip, port: port }, () => {
+          console.log(`[C4I] TCP 서버 연결 성공!`);
+          socket.write("MMS Client Connected\r\n");
+          resolve(true);
+        });
+
+        this.c4iSocket = socket;
+        this.#handleConnection_c4i(socket); // 전용 핸들러 호출
+
+        socket.on('error', (err) => {
+          console.error("[C4I] 소켓 오류:", err.message);
+          this.c4iSocket = null;
+          resolve(false);
+        });
+        socket.on('timeout', () => {
+          console.error("[TCP][C4I] 연결 타임아웃");
+          socket.destroy();
+          resolve(false);
+        });
+      });
+
+    } catch (e) {
+      console.error("[TCP][C4I] connectToC4I 함수 내부 예외:", e.message);
+      return false;
+    }
+  }
+
+  /**
+   * C4I 전용 핸들러 (바이너리 프로토콜 체크 제외)
+   */
+  #handleConnection_c4i(socket) {
+    socket.on('data', (data) => {
+      // C4I 서버로부터 받은 모든 데이터를 텍스트로 변환하여 출력
+      const message = data.toString().trim();
+      console.log(`%c[C4I-RECV] ${message}`, "color: #00ff00; font-weight: bold;");
+
+      // 필요한 경우 웹 UI(MMC)로 전달하기 위해 메타데이터에 기록 가능
+      // this.metadataJson.c4i_last_msg = message;
+      if (this.metadataJson) {
+        this.metadataJson.last_c4i_msg = received;
+      }
+    });
+
+    socket.on('error', (err) => {
+      console.error("[C4I-LINK] Socket Error:", err.message);
+      this.c4iSocket = null;
+    });
+
+    socket.on('end', () => {
+      console.warn("[C4I-LINK] Connection closed by C4I server.");
+      this.c4iSocket = null;
+    });
+  }
+
+  /**
+   * 전송용 메서드 (C4I 전용)
+   */
+  sendToC4I(payload) {
+    if (this.c4iSocket && !this.c4iSocket.destroyed) {
+      this.c4iSocket.write(payload);
+      return true;
+    }
+    return false;
   }
 }

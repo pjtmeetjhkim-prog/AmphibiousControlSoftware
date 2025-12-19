@@ -11,6 +11,10 @@ import {
   IMG_JPG, IMG_PNG, IMG_BMP
 } from "./tcpProtocol.js";
 
+//c4i config read
+import fs from "node:fs/promises";
+import path from "node:path";
+
 const router = express.Router();
 
 /** -------------------------------------------------------
@@ -74,6 +78,21 @@ function deleteByPath(obj, path) {
 /** 루트: 라우터 정보 */
 router.get("/", (req, res) => {
   res.json({ r: "ok", info: "mission manager (tcp admin api)" });
+});
+
+/** -------------------------------------------------------
+ * C4I 설정 파일 읽기 API (CORS 방지용)
+ * ----------------------------------------------------- */
+router.get("/c4i-config", async (req, res) => {
+  try {
+    // 특정 윈도우 경로 지정 (사용자 환경에 맞게 수정)
+    const configPath = "C:/c4i_config.json";
+    const data = await fs.readFile(configPath, "utf8");
+    res.json(JSON.parse(data));
+  } catch (e) {
+    console.error("[SERVER] Config Read Error:", e.message);
+    res.status(500).json({ r: "err", msg: "설정 파일을 읽을 수 없습니다.", detail: e.message });
+  }
 });
 
 /** -------------------------------------------------------
@@ -376,6 +395,27 @@ router.post("/broadcast", async (req, res) => {
   try {
     const tcp = getTcp(req);
     const obj = req.body;
+
+    // 1. C4I 연결 명령 처리
+    if (obj.cmd === "C4I_CONNECT") {
+      // 함수가 존재하는지 체크 (없으면 500 에러 원인)
+      if (typeof tcp.connectToC4I !== 'function') {
+        throw new Error("TcpServer에 connectToC4I 함수가 구현되지 않았습니다.");
+      }
+
+      const success = await tcp.connectToC4I(obj.target_ip, obj.target_port);
+      return res.json({ r: success ? "ok" : "err", msg: success ? "Connected" : "Fail" });
+    }
+
+    // 2. C4I 데이터 송신 명령 처리
+    if (obj.cmd === "C4I_SEND_DATA") {
+      const success = tcp.sendToC4I(obj.payload);
+      return res.json({
+        r: success ? "ok" : "err",
+        msg: success ? "Data sent" : "C4I not connected"
+      });
+    }
+
     if (typeof obj !== "object" || Array.isArray(obj)) {
       return res.status(400).json({ r: "err", msg: "body must be JSON object" });
     }
