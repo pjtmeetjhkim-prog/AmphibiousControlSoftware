@@ -19,6 +19,9 @@ import {
     _clearWaypointLayers
 } from "./mapView.js";
 
+//import * as c4imoulde from "/c4i/c4iClient.js";
+import { C4IClient } from "./c4i/interface_c4i.js";
+
 //import * as apiModule from "/libs/apiHelper.js";
 //import * as mapModule from "./mapView.js";
 
@@ -82,6 +85,11 @@ export class MMCApp {
 
         this.connectControlInterfaceButton = () =>
             document.querySelector('.c4i-connect-btn');
+
+        this.c4i = new C4IClient();
+        this.c4iPolling = false;
+        this.c4iInterval = 100000; // 10초 주기
+
         // --- 내부 상태 ---
         this.polling = false;
         this.pollInterval = 1000;
@@ -330,7 +338,7 @@ export class MMCApp {
                 console.log("[MERGE METADATA RESPONSE]", res);
                 alert("로봇 임무 명령 정지");
                 const container = this.getModeContainer();
-                
+
             } catch (err) {
                 console.error("[MERGE METADATA ERROR]", err);
             }
@@ -519,23 +527,98 @@ export class MMCApp {
     // ------------------------------
     //      Polling / Updates
     // ------------------------------
-    
-    #bindControlInterface(){
+
+    #bindControlInterface() {
         try {
             const btn = this.connectControlInterfaceButton();
-            if(!btn) return;
+            if (!btn) return;
 
-            btn.addEventListener("click", async()=>{
+            btn.addEventListener("click", async () => {
+                // 1. 중복 실행 확인
+                if (this.c4i.isLooping) {
+                    alert("이미 C4I 연동 루프가 실행 중입니다. (연결 상태를 확인하세요)");
+                    console.log("[C4I] 현재 상태: 실행 중, IP:", this.c4i.options.hostname);
+                    return;
+                }
+
                 console.log("C4I 체계 연동 시도.");
-                try {                    
-                    alert("C4I 체계 연동 활성화");
+                try {
+                    const isConfigLoaded = await this.c4i.loadConfig();
+                    if (!isConfigLoaded) {
+                        console.warn("설정 파일을 읽지 못해 기본 설정으로 진행합니다.");
+                    }
+                    const success = await this.c4i.connect();
+                    if (success) {
+                       alert(`C4I 연동 시작 (${this.c4i.options.hostname})`);
+                        this.startC4IPolling(10000); // 연결 성공 시 송신 루프 시작
+                    } else {
+                        alert("C4I 체계 연동 실패.");
+                    }
                 } catch (error) {
-                    console.err("C4I 체계 연동 실패",err);                    
+                    alert("C4I 서버 연결에 실패했습니다. 서버 상태를 확인하세요.");
+                    console.err("C4I 체계 연동 실패", err);
                 }
             });
         } catch (error) {
-            
+            console.error("C4I 연동 중 예상치 못한 오류 발생:", error);
+            alert("연동 오류: " + error.message);
         }
+    }
+
+    // 2. C4I 전용 폴링 시작 루틴
+    startC4IPolling(intervalMs) {
+        if (this.c4iPolling) return;
+        if (intervalMs) this.c4iInterval = Math.max(200, intervalMs);
+        this.c4iPolling = true;
+        this.#c4iPollLoop();
+    }
+
+    // 3. 데이터 수집 및 송신 루프 (핵심 기능)
+    async #c4iPollLoop() {
+        console.log("[C4I] 반복 송신 루프 시작...");
+
+        while (this.c4iPolling) {
+            try {
+                // 현재 선택된 유닛 인덱스 가져오기 (1-based)
+                const selRes = await getMetadataByKey("currentSelectUnit");
+                const unitIdx1 = ((selRes?.value ?? 0) | 0) + 1;
+
+                // 병렬 데이터 수집 (status 및 detector)
+                const [statusRes, detectorRes] = await Promise.all([
+                    getMetadataByKey(`robot_${unitIdx1}.robot_status_data`),
+                    getMetadataByKey(`robot_${unitIdx1}.dectector_data`)
+                ]);
+
+                // 데이터가 존재할 경우에만 전송 실행
+                if (statusRes?.value) {
+                    // this.c4i.sendFormattedData(unitIdx1, statusRes.value, detectorRes?.value);
+                    // //this.c4i.sendRobotData(unitIdx1, statusRes.value, detectorRes?.value);
+                    
+                    //const status = resStatus.value;
+                    const detector = detectorRes?.value || {};
+
+                    // 데이터 포맷 생성
+                    const now = new Date();
+                    const ts = now.toISOString().replace('T', ' ').substring(0, 19);
+                    const payload = `${ts}/${this.c4i.options.armycode}/${detector.class || '0'}/${detector.name || 'none'}/"latitude":${statusRes.value.latitude}, "longitude":${statusRes.value.longitude}\r\n`;
+
+                    // 송신 및 수신 데이터 확인
+                    await this.c4i.sendAndListen(payload);
+                }
+
+            } catch (err) {
+                console.error("[C4I 루프 오류]", err);
+            }
+            // 주기 대기
+            await new Promise(resolve => setTimeout(resolve, this.c4iInterval));
+        }
+    }
+
+    // 4. 폴링 중지 기능
+    stopC4IPolling() {
+        this.c4iPolling = false;
+        if (this.c4i.socket) this.c4i.socket.end();
+        console.log("[C4I] Data Transmission Loop Stopped.");
     }
 
     startPolling(intervalMs) {
@@ -623,13 +706,13 @@ export class MMCApp {
         const selected0 = sel?.value ?? 0;
         const selected1 = selected0 + 1; // 1-based
 
-        const wps = await _getWaypoints(selected1);           
+        const wps = await _getWaypoints(selected1);
         //if (typeof wps?.lat !== "number" || typeof wps?.lng !== "number") return;
-        if((wps.length == 0) && (typeof wps !== "object" || typeof wps?.lng !== "object")){                       
+        if ((wps.length == 0) && (typeof wps !== "object" || typeof wps?.lng !== "object")) {
             _clearWaypointLayers();
             return;
         }
-        await updateWaypointsForUnit(selected1);        
+        await updateWaypointsForUnit(selected1);
     }
 }
 

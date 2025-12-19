@@ -1,0 +1,7 @@
+{
+    "enable": true,
+    "c4i_ip": "192.168.50.101",
+    "c4i_port": "54435",
+    "c4i_tcp_timeout_ms": 600000,
+    "c4i_data_dir": "./c4i_log"
+}
